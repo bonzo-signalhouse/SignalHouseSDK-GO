@@ -1,0 +1,669 @@
+================================================================================
+                    SIGNALHOUSE GO SDK DOCUMENTATION
+================================================================================
+
+INSTALLATION
+--------------------------------------------------------------------------------
+  go get github.com/bonzo-signalhouse/SignalHouseSDK-GO/signalhouse
+
+
+INITIALIZATION
+--------------------------------------------------------------------------------
+  import "github.com/bonzo-signalhouse/SignalHouseSDK-GO/signalhouse"
+
+  client, err := signalhouse.NewClient(signalhouse.Config{
+      APIKey:  "your-api-token",
+      BaseURL: "https://v2.signalhouse.io",
+  })
+  if err != nil {
+      log.Fatal(err)
+  }
+
+  For staging: use "https://v2staging.signalhouse.io" as the BaseURL.
+
+  Required options:
+    - APIKey   (string)  JWT token or service user token for authentication
+    - BaseURL  (string)  API base URL
+
+  NewClient returns an error if APIKey or BaseURL is missing.
+
+
+PER-REQUEST TOKEN OVERRIDE
+--------------------------------------------------------------------------------
+  Every SDK method accepts an optional *RequestOptions parameter to override
+  the default APIKey for that single request.
+
+  Example:
+    resp, err := client.Messages.GetMessages(ctx, signalhouse.GetMessagesParams{
+        Page:  "1",
+        Limit: "10",
+    }, &signalhouse.RequestOptions{Token: "user-specific-jwt-token"})
+
+  The per-request token takes precedence over the APIKey provided at
+  initialization. The original APIKey remains unchanged.
+
+
+CUSTOM HEADERS
+--------------------------------------------------------------------------------
+  Pass additional headers via the RequestOptions.Headers field:
+
+  Example:
+    resp, err := client.Numbers.GetPhoneNumbers(ctx, signalhouse.GetPhoneNumbersParams{
+        Page:  "1",
+        Limit: "20",
+    }, &signalhouse.RequestOptions{
+        Headers: map[string]string{
+            "X-Request-Id": "req_abc123",
+        },
+    })
+
+
+================================================================================
+                          DOMAIN METHOD REFERENCE
+================================================================================
+
+AUTH  (client.Auth)
+--------------------------------------------------------------------------------
+  Login(ctx, LoginParams{Email, Password}, *RequestOptions) (*Response, error)
+    Login with email and password.
+
+  ResetPassword(ctx, ResetPasswordParams{UserID, NewPassword},
+      *RequestOptions) (*Response, error)
+    Reset a user's password.
+
+  GetAuthHistory(ctx, GetAuthHistoryParams{GroupID, UserID, Page, Limit},
+      *RequestOptions) (*Response, error)
+    Get token login history.
+
+
+BILLING  (client.Billing)
+--------------------------------------------------------------------------------
+  GetTransactionHistory(ctx, GetTransactionHistoryParams{GroupID, SubgroupID,
+      BrandID, CampaignID, EntryType, TransactionType, StartDate, EndDate},
+      *RequestOptions) (*Response, error)
+    Get transaction history with filters.
+
+  GetWallet(ctx, GetWalletParams{GroupID},
+      *RequestOptions) (*Response, error)
+    Get wallet balance and settings.
+
+  UpdateWallet(ctx, UpdateWalletParams{GroupID, AutoRechargeEnabled,
+      AutoRechargeThreshold, AutoRechargeToAmount, PrimaryPaymentMethodID,
+      SecondaryPaymentMethodID}, *RequestOptions) (*Response, error)
+    Update wallet auto-recharge settings.
+
+  GetPaymentMethods(ctx, GetPaymentMethodsParams{GroupID},
+      *RequestOptions) (*Response, error)
+    List saved payment methods.
+
+  AddFunds(ctx, AddFundsParams{GroupID, Amount, PaymentMethodID},
+      *RequestOptions) (*Response, error)
+    Add funds to wallet. Amount is in microdollars (1,000,000 = $1.00).
+
+  AddPaymentMethod(ctx, AddPaymentMethodParams{GroupID, PaymentMethodID},
+      *RequestOptions) (*Response, error)
+    Save a new payment method.
+
+  RemovePaymentMethod(ctx, RemovePaymentMethodParams{GroupID,
+      PaymentMethodID}, *RequestOptions) (*Response, error)
+    Remove a saved payment method.
+
+  GetInvoiceDetails(ctx, GetInvoiceDetailsParams{GroupID, SubgroupID,
+      StartDate, EndDate}, *RequestOptions) (*Response, error)
+    Get invoice/billing details.
+
+  GetFees(ctx, GetFeesParams{GroupID},
+      *RequestOptions) (*Response, error)
+    Get fee schedule for the group.
+
+
+BRANDS  (client.Brands)
+--------------------------------------------------------------------------------
+  GetBrands(ctx, GetBrandsParams{ID, SubgroupID, GroupID, Page, Limit,
+      Status}, *RequestOptions) (*Response, error)
+    List brands with filters.
+
+  CreateBrand(ctx, CreateBrandParams{BrandData},
+      *RequestOptions) (*Response, error)
+    Create a new 10DLC brand.
+
+  UpdateBrand(ctx, UpdateBrandParams{BrandID, BrandData},
+      *RequestOptions) (*Response, error)
+    Update brand information.
+
+  DeleteBrand(ctx, DeleteBrandParams{BrandID},
+      *RequestOptions) (*Response, error)
+    Delete (soft) a brand.
+
+  TransferBrand(ctx, TransferBrandParams{SubgroupID, BrandIDs},
+      *RequestOptions) (*Response, error)
+    Transfer brands to a different subgroup.
+
+  GetExternalVetting(ctx, GetExternalVettingParams{BrandID},
+      *RequestOptions) (*Response, error)
+    Get external vetting info for a brand.
+
+  CreateExternalVetting(ctx, CreateExternalVettingParams{BrandID},
+      *RequestOptions) (*Response, error)
+    Submit brand for external vetting.
+
+  ImportExternalVetting(ctx, ImportExternalVettingParams{BrandID,
+      VettingProviderID, VettingID, VettingToken}, *RequestOptions) (*Response, error)
+    Import an existing external vetting record (not billable).
+
+  RevetBrand(ctx, RevetBrandParams{BrandID},
+      *RequestOptions) (*Response, error)
+    Resubmit brand for vetting.
+
+  GetAppealHistory(ctx, GetAppealHistoryParams{BrandID},
+      *RequestOptions) (*Response, error)
+    List identity status appeals for a brand.
+
+  SubmitAppeal(ctx, SubmitAppealParams{BrandID, AppealCategories,
+      Explanation, File}, *RequestOptions) (*Response, error)
+    Submit a brand identity status appeal with supporting documentation.
+    Uses multipart/form-data automatically.
+    AppealCategories: []string (VERIFY_TAX_ID, VERIFY_NON_PROFIT, VERIFY_GOVERNMENT)
+    Explanation: string (max 1024 chars)
+    File: io.Reader (supported: .jpg, .jpeg, .png, .bmp, .raw, .tiff, .pdf, .docx, .htm, .odt, .rtf, .txt, .xml)
+
+
+CAMPAIGNS  (client.Campaigns)
+--------------------------------------------------------------------------------
+  GetCampaigns(ctx, GetCampaignsParams{ID, BrandID, SubgroupID, GroupID,
+      Page, Limit, Status}, *RequestOptions) (*Response, error)
+    List campaigns with filters.
+
+  CreateCampaign(ctx, CreateCampaignParams{CampaignData},
+      *RequestOptions) (*Response, error)
+    Create a new 10DLC campaign.
+
+  UpdateCampaign(ctx, UpdateCampaignParams{CampaignID, CampaignData},
+      *RequestOptions) (*Response, error)
+    Update campaign details.
+
+  DeleteCampaign(ctx, DeleteCampaignParams{CampaignID},
+      *RequestOptions) (*Response, error)
+    Delete (soft) a campaign.
+
+  AppealDcaRejection(ctx, AppealDcaRejectionParams{CampaignID, Reason},
+      *RequestOptions) (*Response, error)
+    Appeal a DCA-rejected campaign. The campaign must be in DCA_REJECTED status.
+    Sends a POST to /campaign/appealDcaRejection/:campaignId.
+    Reason: string (max 2048 chars)
+    Returns 202: { Message: "Campaign DCA appeal has been queued for processing" }
+
+  NudgeDcaForCampaign(ctx, NudgeDcaForCampaignParams{CampaignID},
+      *RequestOptions) (*Response, error)
+    Nudge a connectivity partner to prioritize review of a campaign in PENDING_DCA_APPROVAL status.
+    Sends a POST to /campaign/nudge/:campaignId.
+    No request body required.
+    Returns 200: { message: "Nudge successful" }
+
+
+GROUPS  (client.Groups)
+--------------------------------------------------------------------------------
+  GetGroup(ctx, GetGroupParams{ID},
+      *RequestOptions) (*Response, error)
+    Get group details by ID.
+
+  UpdateGroup(ctx, UpdateGroupParams{ID, GroupData},
+      *RequestOptions) (*Response, error)
+    Update group information.
+
+
+LANDINGS  (client.Landings)
+--------------------------------------------------------------------------------
+  GetLandings(ctx, GetLandingsParams{LandingID},
+      *RequestOptions) (*Response, error)
+    Get a landing page by ID.
+
+  GetLandingByBrandID(ctx, GetLandingByBrandIDParams{BrandID},
+      *RequestOptions) (*Response, error)
+    Get landing page associated with a brand.
+
+  CreateLanding(ctx, CreateLandingParams{LandingData, File},
+      *RequestOptions) (*Response, error)
+    Create a landing page with optional image upload.
+    Uses multipart/form-data automatically.
+
+  UpdateLanding(ctx, UpdateLandingParams{LandingID, LandingData, File},
+      *RequestOptions) (*Response, error)
+    Update a landing page with optional image upload.
+    Uses multipart/form-data automatically.
+
+  DeleteLanding(ctx, DeleteLandingParams{LandingID},
+      *RequestOptions) (*Response, error)
+    Delete a landing page.
+
+
+MESSAGES  (client.Messages)
+--------------------------------------------------------------------------------
+  GetMessages(ctx, GetMessagesParams{ID, CampaignID, BrandID, SubgroupID,
+      GroupID, Status, Direction, MessageType, Carrier, SentimentLabel,
+      StartDate, EndDate, SortField, SortOrder, Page, Limit},
+      *RequestOptions) (*Response, error)
+    List messages with extensive filters.
+
+  GetAnalytics(ctx, GetAnalyticsParams{GroupID, SubgroupID, BrandID,
+      CampaignID, PhoneNumber, Carrier, StartDate, EndDate},
+      *RequestOptions) (*Response, error)
+    Get aggregated message analytics.
+
+  SendSMS(ctx, SendSMSParams{SenderPhoneNumber, RecipientPhoneNumbers,
+      MessageBody, StatusCallbackURL, EnableShortlink},
+      *RequestOptions) (*Response, error)
+    Send an SMS message.
+    Required: SenderPhoneNumber, RecipientPhoneNumbers, MessageBody
+
+  SendMMS(ctx, SendMMSParams{SenderPhoneNumber, RecipientPhoneNumbers,
+      MessageBody, MediaURLs, StatusCallbackURL, EnableShortlink,
+      EnableCompression, Images},
+      *RequestOptions) (*Response, error)
+    Send an MMS message with media attachments.
+    Uses multipart/form-data automatically.
+    Required: SenderPhoneNumber, RecipientPhoneNumbers, MessageBody
+
+  SendGroupMessage(ctx, SendGroupMessageParams{SenderPhoneNumber,
+      RecipientPhoneNumbers, MessageBody, MediaURLs, StatusCallbackURL,
+      EnableShortlink, EnableCompression, Images},
+      *RequestOptions) (*Response, error)
+    Send a group MMS message.
+    Uses multipart/form-data automatically.
+    Required: SenderPhoneNumber, RecipientPhoneNumbers, MessageBody
+
+  CarrierIdLookup(ctx, CarrierIdLookupParams{PhoneNumber}, opts)
+    Look up the carrier for a phone number.
+    Always performs a fresh lookup (not cached). Billed per request.
+    Required: PhoneNumber (10+ digits, no + prefix)
+    Returns: { phoneNumber, carrier, carrierFamily, carrierRegion, ported, type, degradedConfidence, cost }
+
+
+NOTIFICATIONS  (client.Notifications)
+--------------------------------------------------------------------------------
+  GetNotifications(ctx, GetNotificationsParams{ID, GroupID, Page, Limit,
+      Status, EventTypes}, *RequestOptions) (*Response, error)
+    Get notifications with filters.
+
+  UpdateNotificationStatus(ctx, UpdateNotificationStatusParams{IDs, Status},
+      *RequestOptions) (*Response, error)
+    Mark notifications as READ or UNREAD.
+
+  DeleteNotification(ctx, DeleteNotificationParams{ID},
+      *RequestOptions) (*Response, error)
+    Delete a notification.
+
+
+NUMBERS  (client.Numbers)
+--------------------------------------------------------------------------------
+  GetPhoneNumbers(ctx, GetPhoneNumbersParams{PhoneNumber, CampaignID,
+      BrandID, SubgroupID, GroupID, Page, Limit},
+      *RequestOptions) (*Response, error)
+    List your phone numbers with filters.
+
+  GetNumberHealth(ctx, phoneNumber, *RequestOptions) (*Response, error)
+    Get the portal-parity health score (1–10) for an owned phone number.
+    Returns sevenDay and thirtyDay breakdowns matching the portal.
+
+  GetAvailablePhoneNumbers(ctx, GetAvailablePhoneNumbersParams{SMSEnabled,
+      MMSEnabled, VoiceEnabled, Country, State, NPA, NXX, PhoneNumber,
+      Limit, Page}, *RequestOptions) (*Response, error)
+    Search available numbers for purchase.
+
+  PurchasePhoneNumber(ctx, PurchasePhoneNumberParams{PhoneNumbers,
+      SubgroupID}, *RequestOptions) (*Response, error)
+    Purchase one or more phone numbers.
+
+  UpdatePhoneNumber(ctx, UpdatePhoneNumberParams{PhoneNumber, UpdateData},
+      *RequestOptions) (*Response, error)
+    Update phone number details (e.g., friendly name).
+
+  AssignPhoneNumberToCampaign(ctx, AssignPhoneNumberToCampaignParams{
+      CampaignID, PhoneNumbers}, *RequestOptions) (*Response, error)
+    Assign numbers to a campaign.
+
+  UnassignPhoneNumbersFromCampaigns(ctx,
+      UnassignPhoneNumbersFromCampaignsParams{PhoneNumbers},
+      *RequestOptions) (*Response, error)
+    Unassign numbers from their campaigns.
+
+  DeletePhoneNumbers(ctx, DeletePhoneNumbersParams{PhoneNumbers},
+      *RequestOptions) (*Response, error)
+    Release phone numbers.
+
+  TransferPhoneNumbers(ctx, TransferPhoneNumbersParams{PhoneNumbers,
+      NewSubgroupID}, *RequestOptions) (*Response, error)
+    Transfer unassigned numbers between subgroups.
+
+  SearchNpaNxx(ctx, SearchNpaNxxParams{Country, State, City, NPA, NXX},
+      *RequestOptions) (*Response, error)
+    Search NPA/NXX area code lookup data.
+
+  LookupLocations(ctx, LookupLocationsParams{Entries},
+      *RequestOptions) (*Response, error)
+    Batch lookup city/state for NPA/NXX pairs.
+    Entries: []NpaNxxEntry{{NPA: "213", NXX: "555"}, ...}
+
+  PortInPhoneNumber(ctx, PortInPhoneNumberParams{NumberData},
+      *RequestOptions) (*Response, error)
+    Submit a port-in request (POST /number/portin).
+    NumberData: map[string]interface{} containing port-in request data (required).
+
+  GetPortRequests(ctx, GetPortRequestsParams{GroupID, PhoneNumber,
+      Status, Page, Limit}, *RequestOptions) (*Response, error)
+    Get port-in requests with optional filters (GET /number/portin).
+    All parameters are optional.
+
+
+SHORTLINKS  (client.Shortlinks)
+--------------------------------------------------------------------------------
+  GetShortlink(ctx, GetShortlinkParams{ShortlinkID, MessageID, PhoneNumber,
+      CampaignID, BrandID, SubgroupID, GroupID, Page, Limit},
+      *RequestOptions) (*Response, error)
+    Get shortlink details and click data.
+
+  GetShortlinkRedirect(ctx, GetShortlinkRedirectParams{ShortlinkID},
+      *RequestOptions) (*Response, error)
+    Get the redirect URL for a shortlink.
+
+
+SUBGROUPS  (client.Subgroups)
+--------------------------------------------------------------------------------
+  GetSubgroups(ctx, GetSubgroupsParams{ID, GroupID, Page, Limit},
+      *RequestOptions) (*Response, error)
+    List subgroups with filters.
+
+  CreateSubgroup(ctx, CreateSubgroupParams{SubgroupData},
+      *RequestOptions) (*Response, error)
+    Create a new subgroup.
+    CreateSubgroupData includes optional CarrierIDFamily and CarrierIDRegion.
+    Setting CarrierIDFamily or CarrierIDRegion requires signalhouse_api,
+    signalhouse_admin, signalhouse_user, api, admin, developer, or billing role.
+
+  UpdateSubgroup(ctx, UpdateSubgroupParams{ID, UpdateData},
+      *RequestOptions) (*Response, error)
+    Update subgroup details.
+    UpdateSubgroupData includes optional CarrierIDFamily and CarrierIDRegion.
+    Setting CarrierIDFamily or CarrierIDRegion requires signalhouse_api,
+    signalhouse_admin, signalhouse_user, api, admin, developer, or billing role.
+
+  DeleteSubgroup(ctx, DeleteSubgroupParams{ID},
+      *RequestOptions) (*Response, error)
+    Delete (deactivate) a subgroup.
+
+
+SUBSCRIPTIONS  (client.Subscriptions)
+--------------------------------------------------------------------------------
+  GetSubscriptions(ctx, GetSubscriptionsParams{GroupID, OnlyActive},
+      *RequestOptions) (*Response, error)
+    Get subscription history for a group.
+
+  Subscribe(ctx, SubscribeParams{GroupID, TemplateID},
+      *RequestOptions) (*Response, error)
+    Subscribe a group to a plan.
+
+  Unsubscribe(ctx, UnsubscribeParams{GroupID},
+      *RequestOptions) (*Response, error)
+    Unsubscribe a group from their current plan.
+
+
+USERS  (client.Users)
+--------------------------------------------------------------------------------
+  GetUsers(ctx, GetUsersParams{ID, GroupID, UserType},
+      *RequestOptions) (*Response, error)
+    List users with filters.
+
+  CreateUser(ctx, CreateUserParams{Data},
+      *RequestOptions) (*Response, error)
+    Create a new user.
+
+  CreateServiceUser(ctx, CreateServiceUserParams{Data},
+      *RequestOptions) (*Response, error)
+    Create a service user (API key).
+
+  UpdateUser(ctx, UpdateUserParams{ID, Data},
+      *RequestOptions) (*Response, error)
+    Update user information.
+
+  DeleteUser(ctx, DeleteUserParams{ID},
+      *RequestOptions) (*Response, error)
+    Delete (deactivate) a user.
+
+  GetNotificationPreferences(ctx,
+      GetNotificationPreferencesParams{ID},
+      *RequestOptions) (*Response, error)
+    Get user notification preferences.
+
+  UpdateNotificationPreferences(ctx,
+      UpdateNotificationPreferencesParams{ID, NotificationPreferences},
+      *RequestOptions) (*Response, error)
+    Update notification preferences.
+
+
+WEBHOOKS  (client.Webhooks)
+--------------------------------------------------------------------------------
+  GetWebhooks(ctx, GetWebhooksParams{ID, GroupID, EndpointType, PhoneNumber,
+      Page, Limit}, *RequestOptions) (*Response, error)
+    List webhooks with filters.
+
+  CreateWebhook(ctx, CreateWebhookParams{WebhookData},
+      *RequestOptions) (*Response, error)
+    Create a new webhook.
+
+  UpdateWebhook(ctx, UpdateWebhookParams{ID, UpdateData},
+      *RequestOptions) (*Response, error)
+    Update webhook configuration.
+
+  DeleteWebhook(ctx, DeleteWebhookParams{ID},
+      *RequestOptions) (*Response, error)
+    Delete a webhook.
+
+
+================================================================================
+                          MULTIPART REQUESTS
+================================================================================
+
+  The following methods use multipart/form-data automatically:
+
+    - client.Messages.SendMMS(...)
+    - client.Messages.SendGroupMessage(...)
+    - client.Landings.CreateLanding(...)
+    - client.Landings.UpdateLanding(...)
+    - client.Brands.SubmitAppeal(...)
+
+  You do not need to construct multipart writers manually. Pass file data
+  via io.Reader fields in the params struct and the SDK builds the form
+  data internally.
+
+
+================================================================================
+                          QUERY STRING HELPERS
+================================================================================
+
+  The SDK automatically constructs query strings from params struct fields.
+  Any field with its zero value (empty string, 0) is excluded, so you only
+  need to set the filters you care about.
+
+  Example:
+    // Only sends ?status=FAILED&page=1&limit=50
+    resp, err := client.Messages.GetMessages(ctx, signalhouse.GetMessagesParams{
+        Status: "FAILED",
+        Page:   "1",
+        Limit:  "50",
+    }, nil)
+
+
+================================================================================
+                             VALIDATION
+================================================================================
+
+  The SDK validates required parameters client-side before making any HTTP
+  request. If a required parameter is missing or empty, the SDK returns a
+  *ValidationError immediately -- no network request is made.
+
+  Validation errors:
+    - Type:    *signalhouse.ValidationError
+    - Message: "missing required parameter: <fieldName>"
+    - Implements the error interface
+
+  Check with errors.As:
+    var valErr *signalhouse.ValidationError
+    if errors.As(err, &valErr) {
+        fmt.Println(valErr.Field)
+    }
+
+
+================================================================================
+                           ERROR HANDLING
+================================================================================
+
+  The SDK uses a standardized response format. HTTP errors are NOT returned
+  as Go errors -- they are returned as *Response values with Success == false.
+
+  Success response:
+    &Response{Success: true, Data: map[...]interface{}{...}, Status: 200}
+
+  Error response:
+    &Response{Success: false, Error: "Error message", Status: 400}
+
+  Error types summary:
+
+    Source                    Behavior                         How to Handle
+    -----------------------------------------------------------------------
+    Missing required param    Returns error (*ValidationError) Check err != nil
+    HTTP 4xx/5xx from API     Returns *Response                Check resp.Success
+    Network failure           Returns error                    Check err != nil
+
+
+================================================================================
+                       COMPLETE INTEGRATION EXAMPLE
+================================================================================
+
+  package main
+
+  import (
+      "encoding/json"
+      "errors"
+      "fmt"
+      "log"
+      "net/http"
+      "os"
+      "strconv"
+
+      "github.com/bonzo-signalhouse/SignalHouseSDK-GO/signalhouse"
+  )
+
+  func main() {
+      client, err := signalhouse.NewClient(signalhouse.Config{
+          APIKey:  os.Getenv("SIGNALHOUSE_API_KEY"),
+          BaseURL: "https://v2.signalhouse.io",
+      })
+      if err != nil {
+          log.Fatal(err)
+      }
+
+      // Send an SMS notification
+      http.HandleFunc("POST /api/notify", func(w http.ResponseWriter, r *http.Request) {
+          var req struct {
+              RecipientNumber string `json:"recipientNumber"`
+              Message         string `json:"message"`
+              SenderNumber    string `json:"senderNumber"`
+          }
+          if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+              http.Error(w, "invalid request body", http.StatusBadRequest)
+              return
+          }
+
+          resp, err := client.Messages.SendSMS(r.Context(), signalhouse.SendSMSParams{
+              SenderPhoneNumber:     req.SenderNumber,
+              RecipientPhoneNumbers: []string{req.RecipientNumber},
+              MessageBody:           req.Message,
+              StatusCallbackURL:     fmt.Sprintf("%s/api/delivery-status", os.Getenv("BASE_URL")),
+          }, nil)
+
+          var valErr *signalhouse.ValidationError
+          if errors.As(err, &valErr) {
+              http.Error(w, valErr.Error(), http.StatusBadRequest)
+              return
+          }
+          if err != nil {
+              http.Error(w, "internal server error", http.StatusInternalServerError)
+              return
+          }
+          if !resp.Success {
+              w.WriteHeader(resp.Status)
+              json.NewEncoder(w).Encode(map[string]string{"error": resp.Error})
+              return
+          }
+
+          json.NewEncoder(w).Encode(resp.Data)
+      })
+
+      // Receive delivery status callbacks
+      http.HandleFunc("POST /api/delivery-status", func(w http.ResponseWriter, r *http.Request) {
+          var status struct {
+              MessageID string `json:"messageId"`
+              Status    string `json:"status"`
+          }
+          json.NewDecoder(r.Body).Decode(&status)
+          fmt.Printf("Message %s status: %s\n", status.MessageID, status.Status)
+          json.NewEncoder(w).Encode(map[string]bool{"received": true})
+      })
+
+      // List phone numbers with per-request token override
+      http.HandleFunc("GET /api/numbers", func(w http.ResponseWriter, r *http.Request) {
+          userToken := r.Header.Get("Authorization")
+          if len(userToken) > 7 {
+              userToken = userToken[7:] // strip "Bearer "
+          }
+
+          page := r.URL.Query().Get("page")
+          if page == "" {
+              page = "1"
+          }
+          limit := r.URL.Query().Get("limit")
+          if limit == "" {
+              limit = "20"
+          }
+
+          resp, err := client.Numbers.GetPhoneNumbers(r.Context(), signalhouse.GetPhoneNumbersParams{
+              Page:  page,
+              Limit: limit,
+          }, &signalhouse.RequestOptions{Token: userToken})
+          if err != nil {
+              http.Error(w, "internal server error", http.StatusInternalServerError)
+              return
+          }
+          if !resp.Success {
+              w.WriteHeader(resp.Status)
+              json.NewEncoder(w).Encode(map[string]string{"error": resp.Error})
+              return
+          }
+
+          json.NewEncoder(w).Encode(resp.Data)
+      })
+
+      // Get message analytics
+      http.HandleFunc("GET /api/analytics", func(w http.ResponseWriter, r *http.Request) {
+          q := r.URL.Query()
+          resp, err := client.Messages.GetAnalytics(r.Context(), signalhouse.GetAnalyticsParams{
+              StartDate:  q.Get("startDate"),
+              EndDate:    q.Get("endDate"),
+              CampaignID: q.Get("campaignId"),
+          }, nil)
+          if err != nil {
+              http.Error(w, "internal server error", http.StatusInternalServerError)
+              return
+          }
+          if !resp.Success {
+              w.WriteHeader(resp.Status)
+              json.NewEncoder(w).Encode(map[string]string{"error": resp.Error})
+              return
+          }
+
+          json.NewEncoder(w).Encode(resp.Data)
+      })
+
+      log.Println("Server running on port 3000")
+      log.Fatal(http.ListenAndServe(":3000", nil))
+  }
