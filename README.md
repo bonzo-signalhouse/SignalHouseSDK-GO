@@ -1,6 +1,14 @@
+> **This package has moved.** `github.com/bonzo-signalhouse/SignalHouseSDK-GO` is now [`github.com/signalhouse-sms/sdk-go`](https://pkg.go.dev/github.com/signalhouse-sms/sdk-go), developed at
+> https://github.com/signalhouse-sms/sdk-go. This package is a thin shim that installs `github.com/signalhouse-sms/sdk-go` at the
+> same version and re-exports it. It receives every release until **2027-05-01**, then stops.
+>
+> **Migrate:** `go get github.com/signalhouse-sms/sdk-go`, then change imports from `github.com/bonzo-signalhouse/SignalHouseSDK-GO/signalhouse` to `github.com/signalhouse-sms/sdk-go/signalhouse`. The API is identical.
+
 # SignalHouse Go SDK
 
 Official Go SDK for the SignalHouse API. Provides a type-safe client for managing SMS/MMS messaging, phone numbers, 10DLC brands/campaigns, billing, and more.
+
+Full API reference and guides: https://app2.signalhouse.io/docs
 
 ## Requirements
 
@@ -9,7 +17,7 @@ Official Go SDK for the SignalHouse API. Provides a type-safe client for managin
 ## Installation
 
 ```bash
-go get github.com/bonzo-signalhouse/SignalHouseSDK-GO
+go get github.com/signalhouse-sms/sdk-go
 ```
 
 ## Quick Start
@@ -22,13 +30,13 @@ import (
     "fmt"
     "log"
 
-    "github.com/bonzo-signalhouse/SignalHouseSDK-GO/signalhouse"
+    "github.com/signalhouse-sms/sdk-go/signalhouse"
 )
 
 func main() {
     client, err := signalhouse.NewClient(signalhouse.Config{
         APIKey:  "your-api-key",
-        BaseURL: "https://api.signalhouse.com",
+        BaseURL: "https://v2.signalhouse.io",
     })
     if err != nil {
         log.Fatal(err)
@@ -63,6 +71,8 @@ resp, err := client.Numbers.GetPhoneNumbers(ctx, signalhouse.GetPhoneNumbersPara
 }, opts)
 ```
 
+Set `RequestOptions.IdempotencyKey` to make a create, update or delete safe to retry: the SDK sends it as the `Idempotency-Key` header, and a retry with the same key and request replays the first response instead of running it again. Keys are scoped to the authenticated user and kept for 24 hours.
+
 ## API Domains
 
 All API methods are organized by domain:
@@ -71,11 +81,12 @@ All API methods are organized by domain:
 |---------|--------|-------------|
 | `client.Auth` | `AuthService` | Login, password reset, auth history |
 | `client.Billing` | `BillingService` | Wallets, payments, transactions, invoices, fees |
-| `client.Brands` | `BrandsService` | 10DLC brand registration and management |
+| `client.Brands` | `BrandsService` | 10DLC brand registration and management, toll-free business verification |
 | `client.Campaigns` | `CampaignsService` | 10DLC campaign management |
 | `client.Groups` | `GroupsService` | Group management |
 | `client.Landings` | `LandingsService` | Landing page management (with file upload) |
 | `client.Messages` | `MessagesService` | SMS, MMS, group messaging, analytics |
+| `client.Templates` | `TemplatesService` | Versioned message templates (`/template`): drafts, publish, validate, media |
 | `client.Notifications` | `NotificationsService` | Notification management |
 | `client.Numbers` | `NumbersService` | Phone number search, purchase, assignment |
 | `client.Shortlinks` | `ShortlinksService` | URL shortener |
@@ -91,7 +102,7 @@ Some services have admin-only methods accessible via the `.Admin` field. Enable 
 ```go
 client, _ := signalhouse.NewClient(signalhouse.Config{
     APIKey:      "admin-api-key",
-    BaseURL:     "https://api.signalhouse.com",
+    BaseURL:     "https://v2.signalhouse.io",
     EnableAdmin: true,
 })
 
@@ -158,7 +169,7 @@ if err != nil {
 ```go
 client, _ := signalhouse.NewClient(signalhouse.Config{
     APIKey:     "your-api-key",
-    BaseURL:    "https://api.signalhouse.com",
+    BaseURL:    "https://v2.signalhouse.io",
     HTTPClient: &http.Client{Timeout: 30 * time.Second},
 })
 ```
