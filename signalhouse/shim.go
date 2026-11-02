@@ -165,6 +165,7 @@ type GetExpiredShortCodeLeasesParams = sdk.GetExpiredShortCodeLeasesParams
 type GetExternalVettingParams = sdk.GetExternalVettingParams
 type GetFeesParams = sdk.GetFeesParams
 type GetGroupParams = sdk.GetGroupParams
+type GetGroupThroughputUsageParams = sdk.GetGroupThroughputUsageParams
 type GetInvoiceDetailsParams = sdk.GetInvoiceDetailsParams
 type GetKnowledgeItemParams = sdk.GetKnowledgeItemParams
 type GetKnowledgeItemsParams = sdk.GetKnowledgeItemsParams
