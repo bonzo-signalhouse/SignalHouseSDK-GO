@@ -81,12 +81,13 @@ All API methods are organized by domain:
 |---------|--------|-------------|
 | `client.Auth` | `AuthService` | Login, password reset, auth history |
 | `client.Billing` | `BillingService` | Wallets, payments, transactions, invoices, fees |
-| `client.Brands` | `BrandsService` | 10DLC brand registration and management, toll-free business verification |
+| `client.Brands` | `BrandsService` | 10DLC and toll-free brand registration and management |
 | `client.Campaigns` | `CampaignsService` | 10DLC campaign management |
 | `client.Groups` | `GroupsService` | Group management |
 | `client.Landings` | `LandingsService` | Landing page management (with file upload) |
 | `client.Messages` | `MessagesService` | SMS, MMS, group messaging, analytics |
 | `client.Templates` | `TemplatesService` | Versioned message templates (`/template`): drafts, publish, validate, media |
+| `client.Rcs.Agents` | `RcsAgentsService` | RCS agents (`/rcs/agent`): drafts linked to a 10DLC brand and campaign, validate, submit, archive, logo/hero upload |
 | `client.Notifications` | `NotificationsService` | Notification management |
 | `client.Numbers` | `NumbersService` | Phone number search, purchase, assignment |
 | `client.Shortlinks` | `ShortlinksService` | URL shortener |
