@@ -87,7 +87,8 @@ All API methods are organized by domain:
 | `client.Landings` | `LandingsService` | Landing page management (with file upload) |
 | `client.Messages` | `MessagesService` | SMS, MMS, group messaging, analytics |
 | `client.Templates` | `TemplatesService` | Versioned message templates (`/template`): drafts, publish, validate, media |
-| `client.Rcs.Agents` | `RcsAgentsService` | RCS agents (`/rcs/agent`): drafts linked to a 10DLC brand and campaign, validate, submit, archive, logo/hero upload |
+| `client.Rcs.Agents` | `RcsAgentsService` | RCS agents (`/rcs/agent`): drafts linked to a brand and campaign, validate, submit, archive, logo/hero upload |
+| `client.Rcs.Messages` | `RcsMessagesService` | RCS messages: send, validate, estimate, capability check, read |
 | `client.Notifications` | `NotificationsService` | Notification management |
 | `client.Numbers` | `NumbersService` | Phone number search, purchase, assignment |
 | `client.Shortlinks` | `ShortlinksService` | URL shortener |
