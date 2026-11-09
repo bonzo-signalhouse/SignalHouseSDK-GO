@@ -32,6 +32,7 @@ type AdminUpdateComplianceStatusParams = sdk.AdminUpdateComplianceStatusParams
 type AdminUpdateCustomSubscriptionParams = sdk.AdminUpdateCustomSubscriptionParams
 type AdminUpdateTemplateParams = sdk.AdminUpdateTemplateParams
 type AgentBackgroundSound = sdk.AgentBackgroundSound
+type AgentCommitment = sdk.AgentCommitment
 type AgentsService = sdk.AgentsService
 type AppealDcaRejectionParams = sdk.AppealDcaRejectionParams
 type AppendConversationMessageData = sdk.AppendConversationMessageData
