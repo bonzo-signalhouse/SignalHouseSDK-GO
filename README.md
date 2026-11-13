@@ -95,6 +95,7 @@ All API methods are organized by domain:
 | `client.Subgroups` | `SubgroupsService` | Subgroup management |
 | `client.Subscriptions` | `SubscriptionsService` | Subscription management |
 | `client.Users` | `UsersService` | User management |
+| `client.Verify` | `VerifyService` | Carrier phone-number checks (`/verify`): SIM Swap and Number Verify (phone on mobile data; each answered check is billed) |
 | `client.Webhooks` | `WebhooksService` | Webhook management |
 
 ## Admin Methods
