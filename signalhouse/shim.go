@@ -155,6 +155,7 @@ type GetApplicationParams = sdk.GetApplicationParams
 type GetAuthHistoryParams = sdk.GetAuthHistoryParams
 type GetAvailablePhoneNumbersParams = sdk.GetAvailablePhoneNumbersParams
 type GetBrandCallerNameParams = sdk.GetBrandCallerNameParams
+type GetBrandFeedbackParams = sdk.GetBrandFeedbackParams
 type GetBrandsParams = sdk.GetBrandsParams
 type GetCallerNameParams = sdk.GetCallerNameParams
 type GetCampaignHealthParams = sdk.GetCampaignHealthParams
