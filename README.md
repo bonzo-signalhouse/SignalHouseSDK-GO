@@ -83,6 +83,7 @@ All API methods are organized by domain:
 | `client.Billing` | `BillingService` | Wallets, payments, transactions, invoices, fees |
 | `client.Brands` | `BrandsService` | 10DLC and toll-free brand registration and management |
 | `client.Campaigns` | `CampaignsService` | 10DLC campaign management |
+| `client.Compliance` | `ComplianceService` | Compliance cases (`/compliance`) Signal House opens on a carrier suspension or escalation: read cases, answer requirements, upload and download files |
 | `client.Groups` | `GroupsService` | Group management |
 | `client.Landings` | `LandingsService` | Landing page management (with file upload) |
 | `client.Messages` | `MessagesService` | SMS, MMS, group messaging, analytics |
