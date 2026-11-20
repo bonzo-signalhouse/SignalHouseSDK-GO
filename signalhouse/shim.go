@@ -71,6 +71,7 @@ type ComplianceService = sdk.ComplianceService
 type Config = sdk.Config
 type ConfirmTwoFactorEnrollmentParams = sdk.ConfirmTwoFactorEnrollmentParams
 type ConfirmTwoFactorIdentityParams = sdk.ConfirmTwoFactorIdentityParams
+type ConnectOntraportParams = sdk.ConnectOntraportParams
 type CorrectRegistrationParams = sdk.CorrectRegistrationParams
 type CreateAgentProfileData = sdk.CreateAgentProfileData
 type CreateAgentProfileParams = sdk.CreateAgentProfileParams
